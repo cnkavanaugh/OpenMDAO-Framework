@@ -20,13 +20,14 @@ class test_function(Component):
 class Analysis(Assembly):
     def __init__(self):
         #Driver Configuration
-        self.add("DOE_trainer",DOEdriver())
-        self.DOE_trainer.sequential = True
-        self.DOE_trainer.DOEgenerator = Uniform
-        self.DOE_trainer.num_samples = 500
-        self.DOE_trainer.add_parameter(x)
-        self.DOE_trainer.add_parameter(y)
-        self.DOE_trainer.case_outputs = [f_xy]
+        self.add("test", test_function())
+        self.add("driver",DOEdriver())
+        self.driver.sequential = True
+        self.driver.DOEgenerator = Uniform
+        self.driver.num_samples = 500
+        self.driver.add_parameter("test.x")
+        self.driver.add_parameter("test.y")
+        self.driver.case_outputs = ["test.f_xy"]
          
         
 class NeuralNetSurrogateTest(unittest.TestCase):
