@@ -1,36 +1,39 @@
 import unittest
 
+
 from openmdao.main.api import Assembly, Component
 
+from openmdao.lib.datatypes.api import Float
 from openmdao.lib.drivers.api import DOEdriver
 from openmdao.lib.doegenerators.api import Uniform
 
-from openmdao.lib.surrogatemodels.neuralnet_surrogate import NeuralNetSurrogate
+# from openmdao.lib.surrogatemodels.neuralnet_surrogate import NeuralNetSurrogate
 
 class test_function(Component):
-    def __init__(self, x, y):
-
-        x = Float(0.,iotype="in",low=-2.,high=2.)
-        y = Float(0.,iotype="in",low=-1.,high=1.)
-            
-        f_xy = Float(0.,iotype="out")
+    x = Float(0.,iotype="in",low=-2.,high=2.)
+    y = Float(0.,iotype="in",low=-1.,high=1.)
+        
+    f_xy = Float(0.,iotype="out")    
     
-        self.f_xy = (4.-2.1*(x**2)+(x**4.)/3.)*(x**2)+x*y+(-4.+4.*(y**2))*(y**2)
+    def execute(self):       
+        self.f_xy = (4.-2.1*(self.x**2)+(self.x**4.)/3.)*(self.x**2)+self.x*self.y+(-4.+4.*(self.y**2))*(self.y**2)
+        print x, y, f_xy
 
 class Analysis(Assembly):
     def __init__(self):
+        super(Assembly,self).__init__()
         #Driver Configuration
         self.add("test", test_function())
         self.add("driver",DOEdriver())
         self.driver.sequential = True
-        self.driver.DOEgenerator = Uniform
+        self.driver.DOEgenerator = Uniform()
         self.driver.num_samples = 500
         self.driver.add_parameter("test.x")
         self.driver.add_parameter("test.y")
         self.driver.case_outputs = ["test.f_xy"]
-         
         
-class NeuralNetSurrogateTest(unittest.TestCase):
-    
-    def setUp(self):
+if __name__ == "__main__":
+    a = Analysis()
+    a.run()
+        
         
