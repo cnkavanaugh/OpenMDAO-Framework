@@ -1,5 +1,5 @@
 import unittest
-
+import random
 
 from openmdao.main.api import Assembly, Component
 
@@ -9,15 +9,19 @@ from openmdao.lib.doegenerators.api import Uniform
 
 # from openmdao.lib.surrogatemodels.neuralnet_surrogate import NeuralNetSurrogate
 
-class test_function(Component):
-    x = Float(0.,iotype="in",low=-2.,high=2.)
-    y = Float(0.,iotype="in",low=-1.,high=1.)
-        
-    f_xy = Float(0.,iotype="out")    
+class NeuralNetTests(unittest.TestCase):
     
-    def execute(self):       
-        self.f_xy = (4.-2.1*(self.x**2)+(self.x**4.)/3.)*(self.x**2)+self.x*self.y+(-4.+4.*(self.y**2))*(self.y**2)
-        print x, y, f_xy
+    def setUp(self):
+        random.seed(10)
+
+        def test_function(self):
+            x = Float(0.,iotype="in",low=-2.,high=2.)
+            y = Float(0.,iotype="in",low=-1.,high=1.)
+        
+            f_xy = Float(0.,iotype="out")    
+    
+            def function(x,y):
+                self.f_xy = (4.-2.1*(self.x**2)+(self.x**4.)/3.)*(self.x**2)+self.x*self.y+(-4.+4.*(self.y**2))*(self.y**2)
 
 class Analysis(Assembly):
     def __init__(self):
