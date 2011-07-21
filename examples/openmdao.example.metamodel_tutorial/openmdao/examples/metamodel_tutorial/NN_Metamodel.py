@@ -1,4 +1,5 @@
 from openmdao.main.api import Assembly
+from openmdao.lib.drivers.api import DOEdriver
 from openmdao.lib.components.api import MetaModel
 from openmdao.lib.surrogatemodels.api import NeuralNetSurrogate
 from openmdao.examples.expected_improvement.branin_component import BraninComponent
@@ -12,4 +13,5 @@ class Simulation(Assembly):
     
     self.meta_model.model = BraninComponent()
     
-    
+    self.add("driver",DOEdriver())
+    self.driver.workflow.add("meta_model")
