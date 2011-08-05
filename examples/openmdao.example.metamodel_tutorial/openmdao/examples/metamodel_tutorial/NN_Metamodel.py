@@ -1,5 +1,7 @@
 from openmdao.main.api import Assembly
-from openmdao.lib.drivers.api import DOEdriver
+
+from openmdao.lib.drivers.api import DOEdriver, CONMINdriver
+
 from openmdao.lib.components.api import MetaModel
 from openmdao.lib.casehandlers.api import DBCaseRecorder
 from openmdao.lib.surrogatemodels.api import NeuralNetSurrogate
@@ -13,25 +15,42 @@ class Simulation(Assembly):
         super(Simulation,self).__init__(self)
     
     #Components
-    self.add("nn_meta_model",MetaModel())
-    self.nn_meta_model.surrogate = {"default":NeuralNetSurrogate()}    
-    self.nn_meta_model.model = TestFuncComponent()
-    self.nn_meta_model.recorder = DBCaseRecorder(':memory:')
-    self.nn_meta_model.force_execute = True
+    self.add("tf_meta_model",MetaModel())
+    self.tf_meta_model.surrogate = {"default":NeuralNetSurrogate()}    
+    self.tf_meta_model.model = TestFuncComponent()
+    self.tf_meta_model.recorder = DBCaseRecorder(':memory:')
+    self.tf_meta_model.force_execute = True
     
-    #Driver Configuration
-    self.add("driver",DOEdriver())
-    self.driver.workflow.add("nn_meta_model")
-    self.driver.sequential = True
-    self.driver.DOEgenerator = Uniform()
-    self.driver.num_samples = 500
-    self.driver.add_parameter("nn_meta_model.x")
-    self.driver.add_parameter("nn_meta_model.y")
-    self.driver.add_event("nn_meta_model.train_next")
-    self.driver.case_outputs = ["nn_meta_model.f_xy"]
-    self.driver.recorder = DBCaseRecorder(os.path.join(self._tdir,'trainer.db'))
+    #Training the MetaModel
+    self.add("DOE_Trainer",DOEdriver())
+    self.DOE_Trainer.workflow.add("tf_meta_model")
+    self.DOE_Trainer.sequential = True
+    self.DOE_Trainer.DOEgenerator = Uniform()
+    self.DOE_Trainer.num_samples = 500
+    self.DOE_Trainer.add_parameter("tf_meta_model.x")
+    self.DOE_Trainer.add_parameter("tf_meta_model.y")
+    self.DOE_Trainer.add_event("tf_meta_model.train_next")
+    self.DOE_Trainer.case_outputs = ["tf_meta_model.f_xy"]
+    self.DOE_Trainer.recorder = DBCaseRecorder(os.path.join(self._tdir,'trainer.db'))
+    
+    #MetaModel Validation
+    self.add("DOE_Predict",DOEdriver())
+    self.DOE_Validate.workflow.add("tf_meta_model")
+    self.DOE_Validate.sequential = True
+    self.DOE_Validate.DOEgenerator = Uniform()
+    self.DOE_Validate.num_samples = 500
+    self.DOE_Validate.add_parameter("tf_meta_model.x")
+    self.DOE_Validate.add_parameter("tf_meta_model.y")
+    self.DOE_Validate.case_outputs = ["tf_meta_model.f_xy"]
+    self.DOE_Validate.recorder = DBCaseRecorder(os.path.join(self._tdir,'trainer.db'))
+    
+    #Iteration Hierarchy
+    self.driver.workflow.add(['DOE_Trainer', 'DOE_Predict'])
+    self.DOE_Trainer.workflow.add('tf_meta_model')
+    self.DOE_Validate.workflow.add('tf_meta_model')
+    self.DOE_Validate.workflow.add('TestFuncComponent')
     
     def cleanup(self):
         shutil.rmtree(self._tdir, ignore_errors=True)
     
-# if __name__ == "__main__":
+if __name__ == "__main__":
