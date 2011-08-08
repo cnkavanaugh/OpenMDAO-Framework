@@ -54,3 +54,4 @@ class Simulation(Assembly):
         shutil.rmtree(self._tdir, ignore_errors=True)
     
 if __name__ == "__main__":
+    
