@@ -1,6 +1,6 @@
 from openmdao.main.api import Assembly
 
-from openmdao.lib.drivers.api import DOEdriver, CONMINdriver
+from openmdao.lib.drivers.api import DOEdriver
 
 from openmdao.lib.components.api import MetaModel
 from openmdao.lib.casehandlers.api import DBCaseRecorder
