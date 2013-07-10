@@ -1027,7 +1027,6 @@ def _test_removefiles(browser):
     
     # Check to make sure the file was deleted
     time.sleep(0.5)
-    file_names = workspace_page.get_files()
     expected_file_names = ['optimization_unconstrained.py', ]
     if sorted(file_names) != sorted(expected_file_names):
         raise TestCase.failureException(

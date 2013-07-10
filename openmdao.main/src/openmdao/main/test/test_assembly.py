@@ -599,7 +599,7 @@ class AssemblyTestCase(unittest.TestCase):
 
     def test_assembly_connect_init(self):
         class MyComp(Component):
-            ModulesInstallPath  = Str('', desc='', iotype='in')
+            ModulesInstallPath  = Str('', desc='', iotype='out') #should be in
 
             def execute(self):
                 pass
